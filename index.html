@@ -1,0 +1,158 @@
+<meta charset="UTF-8">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<link href="https://s3.amazonaws.com/mturk-public/bs30/css/bootstrap.min.css" rel="stylesheet" />
+<style type='text/css'>
+#recordingsList audio { display: block; margin-bottom: 10px; }
+</style>
+<section class="container" id="Other" style="margin-bottom:15px; padding: 10px 10px; font-family: Verdana, Geneva, sans-serif; color:#333333; font-size:0.9em;">
+<div class="row col-xs-12 col-md-12">
+
+<!-- Instructions -->
+<div class="container">
+	<div class="page-header">
+		<h1>Audio submission for Amazon Mechanical Turk</h1>
+	</div>
+
+<div class="panel panel-primary">
+
+	<div class="panel-heading"><strong>Task description</strong></div>
+	<div class="panel-body">
+		<p>Record yourself saying ‘Hello, Hipcam’ 3 times in different tone/speed and upload audio files to this HIT.</p>
+	</div>
+
+    <div class="panel-heading"><strong>Instructions</strong></div>
+    <div class="panel-body">
+        <b>Step 1: Record audio</b>
+        <ol type="number">
+            <li>Fill the form below - your gender and age.</li>
+            <li>Srart recording your audios.</li>
+        </ol>
+
+        <b>Step 2: Record audio</b>
+        <ol type="number">
+            <li>System Checks:
+                <ul type="disc">
+                    <li>Make sure your microphone is connected and working.</li>
+                    <li>Use a recent Goggle Chrome browser version, and allow permission for browser to use microphone.</li>
+                    <li><b>NOTE: You may have to enable loading scripts on this page. Look for the symbol <img src="shield_icon.png" /> on the top right of the page on the address bar.<br />
+                    <font color="red">Refresh the page after providing permissions.</font></b></li>
+                </ul>
+            </li>
+            <li>Make the recording:
+                <ul type="disc">
+                    <li>Press RECORD to start, and STOP to end your recording.</li>
+                    <li>Playback the result using the ► button</li>
+                    <li>Repeat recording until you are happy with the recording content and quality (old recordings are over-written)</li>
+                </ul>
+            </li>
+            <li>Upload recordings:
+            <ul type="disc">
+                <li>Click on the <b>Upload</b> button to submit. On successful upload, the message <b>Uploaded successfully</b> appears.</li>
+            </ul>
+            </li>
+        </ol>
+    </div>
+
+</div>
+<!-- End Instructions -->
+
+<!-- Form Content: -->
+<section>
+    <div id="errorDiv"></div>
+    <span id="statusDiv">&nbsp;</span>
+
+    <form id="audiorecords" action="/" method='POST' enctype="multipart/form-data">
+        <fieldset><label>Gender</label>
+            <select id="genderInput" name="genderInput" required="true">
+                <option>Select</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+        </fieldset>
+
+        <fieldset>
+          <div class="input-group">
+            <label>Age</label>
+<!--            <input class="form-control" name="Q2Answer" size="120" type="text" />-->
+              <input class="form-control" type="text" name="ageInput" id="ageInput" size="20" required="true"/>
+          </div>
+        </fieldset>
+
+
+
+<!--        <fieldset><label>Please upload an image of the restaurant's menu</label>-->
+<!--        <div style="padding: 10px;">-->
+<!--           <input id="file" type="file"><button id="upload_file_button" type="button">Upload file</button>-->
+<!--           <span id="status">&nbsp;</span>-->
+<!--        </div>-->
+<!--        </fieldset>-->
+        <fieldset>
+            <div><label>Please record your command</label>
+<!--                <input type="file" accept="audio/*" capture id="recorder">-->
+<!--                <audio id="player" controls></audio>-->
+<!--                <a id="download">Download</a>-->
+<!--                <button id="stop">Stop</button>-->
+
+                <div class="alert alert-danger" id="shown"><strong>Warning!</strong> Awaiting permission for microphone. Connect microphone, provide permission and refresh page!</div>
+
+                <div id="hidden" style="display:none">
+                    <ul style="list-style-type: none;">
+                        <li><button type="button" class="btn btn-primary" id="recordButton" style="margin-right:5px">Record</button>
+                            <button type="button" class="btn btn-primary" disabled="disabled" id="pauseButton" style="">Pause</button>
+                            <button type="button" class="btn btn-primary" disabled="disabled" id="stopButton" >Stop</button>
+                            <p id="recording" style="display:none">Recording ...</p>
+                        </li>
+                    </ul>
+<!--                    <div id="formats">Format: start recording to see sample rate</div>-->
+                    <label>Recordings</label>
+                    <ol id="recordingsList"></ol>
+
+<!--                    <input id="filename" name="Q1filename" style="display:none" />-->
+<!--                    <ul id="recordings_list" style="list-style-type: none;"><br />-->
+<!--                        <br /><br /><br /><br /><br /><br />-->
+<!--                        &nbsp;-->
+<!--                        <li>&nbsp;</li>-->
+<!--                        <li>&nbsp;</li>-->
+<!--                        <li>&nbsp;</li>-->
+<!--                        <li>&nbsp;</li>-->
+<!--                        <li>&nbsp;</li>-->
+<!--                    </ul>-->
+                </div>
+            </div>
+        </fieldset>
+
+        <input type="reset" id="resetButton" value='Reset'/>
+        <input type="submit" id="submitButton" value='Submit'/>
+
+    </form>
+</section>
+<!-- End Form Content -->
+
+</div>
+</div>
+</section>
+<!-- close container -->
+
+<style type="text/css">fieldset { padding: 10px; background:#fbfbfb; border-radius:5px; margin-bottom:5px; }</style>
+<script src="./validate.js"></script>
+<script src="./recorder.js"></script>
+<script src="./getPermission.js"></script>
+<!--<script src="main.js"></script>-->
+<script src="./app.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#submitButton").click(function (e) {
+            ValidateAll(e);
+            return false;
+        });
+        $("#resetButton").click(function (e) {
+            $('#audiorecords')[0].reset();
+            result_form_data = new FormData();
+            $('#recordingsList').empty();
+            $("#errorDiv").html('').removeClass('alert').removeClass('alert-danger');
+            $("#statusDiv").text("");
+            checkRecordsNumber();
+        });
+    });
+
+</script>

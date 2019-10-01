@@ -1,0 +1,10 @@
+venv/
+.idea/workspace.xml
+.idea
+_tmp/
+
+# Mac
+.DS_Store
+
+upload.html
+index.bk.html
