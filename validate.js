@@ -1,4 +1,3 @@
-
 function ValidateAll(event) {
     var errorCounter = 0;
     var errorMessage = "";
@@ -29,9 +28,6 @@ function ValidateAll(event) {
     $("#errorDiv").html(errorMessage);
     if (errorCounter == 0) {
         $("#errorDiv").removeClass('alert').removeClass('alert-danger')
-//        alert('Thank you.')
-//        return true;
-//        document.getElementById("audiorecords").submit();
         console.log('Thank you! Form submitting...');
         doUploadData(event);
         return true;
@@ -40,8 +36,3 @@ function ValidateAll(event) {
         return false;
     }
 }
-
-//$("#audiorecords").validate({
-//   onkeyup: false,
-//   onclick: false
-//})

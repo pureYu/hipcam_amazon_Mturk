@@ -58,7 +58,7 @@
 <!-- Form Content: -->
 <section>
     <div id="errorDiv"></div>
-    <span id="statusDiv">&nbsp;</span>
+    <div id="statusDiv">&nbsp;</div>
 
     <form id="audiorecords" action="/" method='POST' enctype="multipart/form-data">
         <fieldset><label>Gender</label>
@@ -86,7 +86,6 @@
                 <div id="hidden" style="display:none">
                     <ul style="list-style-type: none;">
                         <li><button type="button" class="btn btn-primary" id="recordButton" style="margin-right:5px">Record</button>
-                            <button type="button" class="btn btn-primary" disabled="disabled" id="pauseButton" style="">Pause</button>
                             <button type="button" class="btn btn-primary" disabled="disabled" id="stopButton" >Stop</button>
                             <p id="recording" style="display:none">Recording ...</p>
                         </li>
@@ -127,7 +126,8 @@
             result_form_data = new FormData();
             $('#recordingsList').empty();
             $("#errorDiv").html('').removeClass('alert').removeClass('alert-danger');
-            $("#statusDiv").text("");
+            $("#statusDiv").text("").removeClass('alert').removeClass('alert-success');
+            $("#submitButton").prop("disabled", false);
             checkRecordsNumber();
         });
     });
