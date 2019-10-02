@@ -18,7 +18,7 @@ stopButton.addEventListener("click", stopRecording);
 
 result_form_data = new FormData();
 
-togglePermissionPanel();
+//togglePermissionPanel();
 
 function togglePermissionPanel() {
     $("#shown").toggle();
@@ -47,6 +47,8 @@ function startRecording() {
 
 	}).catch(function(err) {
 	  	//enable the record button if getUserMedia() fails
+	  	//console.log('Have no permission to the microphone!');
+	  	togglePermissionPanel();
     	recordButton.disabled = false;
     	stopButton.disabled = true;
 	});
@@ -111,7 +113,6 @@ function doUploadData(event) {
     console.log('in doUploadData');
     $("#statusDiv").text("Uploading...");
     $("#submitButton").prop("disabled", true);
-//    $(event.currentTarget).prop("disabled", true);
 
     result_form_data.set('gender', $("#genderInput").val());
     result_form_data.set('age', $("#ageInput").val());
@@ -128,7 +129,7 @@ function doUploadData(event) {
           cache: false,
           contentType: false,
           processData: false,
-          data: result_form_data,                         // Setting the data attribute of ajax with file_data
+          data: result_form_data,
           error: function (request, error) {
               console.log(arguments);
               $("#statusDiv").html("").removeClass('alert alert-success alert-danger');
@@ -143,10 +144,7 @@ function doUploadData(event) {
               checkRecordsNumber();
           }
     })
-
-
 }
-
 
 function createDeleteLink(container, filename_for_input) {
     var delete_link = document.createElement('a');
@@ -158,13 +156,13 @@ function createDeleteLink(container, filename_for_input) {
 		  checkRecordsNumber();
 		  event.preventDefault();
 	})
-	container.appendChild(delete_link) //add the delete link to container
+	container.appendChild(delete_link)
 }
 
 function createSaveToDiskLink(container, url, filename) {
     var link = document.createElement('a');
 	link.href = url;
-	link.download = filename+".wav"; //download forces the browser to donwload the file using the  filename
+	link.download = filename+".wav";
 	link.innerHTML = "Save to disk";
 	container.appendChild(link);
 }
