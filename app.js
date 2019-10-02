@@ -1,24 +1,20 @@
-//webkitURL is deprecated but nevertheless
 URL = window.URL || window.webkitURL;
 
-var gumStream; 						//stream from getUserMedia()
-var rec; 							//Recorder.js object
-var input; 							//MediaStreamAudioSourceNode we'll be recording
+var gumStream;
+var rec;
+var input;
 
-// shim for AudioContext when it's not avb.
 var AudioContext = window.AudioContext || window.webkitAudioContext;
-var audioContext //audio context to help us record
+var audioContext
 
 var recordButton = document.getElementById("recordButton");
 var stopButton = document.getElementById("stopButton");
 
-//add events to those 2 buttons
 recordButton.addEventListener("click", startRecording);
 stopButton.addEventListener("click", stopRecording);
 
 result_form_data = new FormData();
 
-//togglePermissionPanel();
 
 function togglePermissionPanel() {
     $("#shown").toggle();
@@ -36,18 +32,13 @@ function startRecording() {
 	navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
 		console.log("getUserMedia() success, stream created, initializing Recorder.js ...");
 		audioContext = new AudioContext();
-		/*  assign to gumStream for later use  */
 		gumStream = stream;
-		/* use the stream */
 		input = audioContext.createMediaStreamSource(stream);
 		rec = new Recorder(input,{numChannels:1})
-		//start the recording process
 		rec.record()
 		console.log("Recording started");
 
 	}).catch(function(err) {
-	  	//enable the record button if getUserMedia() fails
-	  	//console.log('Have no permission to the microphone!');
 	  	togglePermissionPanel();
     	recordButton.disabled = false;
     	stopButton.disabled = true;
@@ -58,14 +49,8 @@ function stopRecording() {
 	console.log("stopButton clicked");
 	stopButton.disabled = true;
 	recordButton.disabled = false;
-
-	//tell the recorder to stop the recording
 	rec.stop();
-
-	//stop microphone access
 	gumStream.getAudioTracks()[0].stop();
-
-	//create the wav blob and pass it on to createDownloadLink
 	rec.exportWAV(createRecordLinks);
 }
 
@@ -75,32 +60,27 @@ function createRecordLinks(blob) {
 	var au = document.createElement('audio');
 	var li = document.createElement('li');
 
-	//name of .wav file to use during upload and download (without extendion)
 	var filename = new Date().toISOString();
 	var filename_for_input = new Date().getTime();
 	filename_for_input = "audio_"+filename_for_input;
 	var filename_w_ext = filename+".wav"
 
-	//add controls to the <audio> element
 	au.controls = true;
 	au.src = url;
 
-	li.appendChild(au); //add the new audio element to li
+	li.appendChild(au);
 	span = document.createElement('span');
 	span.setAttribute("class","recordname");
-//	span.textContent = filename_for_input+": "+filename_w_ext;
 	span.textContent = filename_w_ext;
-    li.appendChild(span)
-	li.appendChild(document.createTextNode (" "))//add a space in between
+    li.appendChild(span);
+	li.appendChild(document.createTextNode (" "));
 
 	//save to disk link
     //createSaveToDiskLink(li, url, filename)
 
-    //delete link
-	li.appendChild(document.createTextNode (" "))//add a space in between
-	createDeleteLink(li, filename_for_input)
+	li.appendChild(document.createTextNode (" "));
+	createDeleteLink(li, filename_for_input);
 
-	//add the li element to the ol
 	recordingsList.appendChild(li);
 
     result_form_data.append(filename_for_input, blob, filename_w_ext);
@@ -122,10 +102,11 @@ function doUploadData(event) {
         console.log(pair[0]+ ', ' + pair[1]);
     }
 
+    server_url = $('#audiorecords').attr('action')
     $.ajax({
           method : "POST",
           type: "POST",
-          url: "http://127.0.0.1:5000/",
+          url: server_url,
           cache: false,
           contentType: false,
           processData: false,

@@ -42,7 +42,6 @@ def upload_file():
             save_csv_data(user_age, user_gender, user_files);
             save_files(user_files);
             print('OK!!!')
-            # return json.dumps({'success':True, 'message':'Created'}), 201, {'ContentType':'application/json'}
             data = {
                 'success': True,
                 'message': 'Created'
@@ -52,7 +51,6 @@ def upload_file():
             return resp
         else:
             print('Incomplete data set')
-            # return json.dumps({'success':True, 'message':'Created'}), 400, {'ContentType':'application/json'}
             data = {
                 'error': 'Incomplete data set',
                 'status': 400
