@@ -3,6 +3,8 @@ URL = window.URL || window.webkitURL;
 var gumStream;
 var rec;
 var input;
+var DEBUG=false; // Enable logging
+
 
 var AudioContext = window.AudioContext || window.webkitAudioContext;
 var audioContext
@@ -16,13 +18,19 @@ stopButton.addEventListener("click", stopRecording);
 result_form_data = new FormData();
 
 
+var log = function(){
+    if(DEBUG){
+        console.log.apply(console, arguments);
+    }
+}
+
 function togglePermissionPanel() {
     $("#shown").toggle();
     $("#hidden").toggle();
 }
 
 function startRecording() {
-	console.log("recordButton clicked");
+	log("recordButton clicked");
 
     var constraints = { audio: true, video:false }
 
@@ -30,13 +38,13 @@ function startRecording() {
 	stopButton.disabled = false;
 
 	navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
-		console.log("getUserMedia() success, stream created, initializing Recorder.js ...");
+		log("getUserMedia() success, stream created, initializing Recorder.js ...");
 		audioContext = new AudioContext();
 		gumStream = stream;
 		input = audioContext.createMediaStreamSource(stream);
 		rec = new Recorder(input,{numChannels:1})
 		rec.record()
-		console.log("Recording started");
+		log("Recording started");
 
 	}).catch(function(err) {
 	  	togglePermissionPanel();
@@ -46,7 +54,7 @@ function startRecording() {
 }
 
 function stopRecording() {
-	console.log("stopButton clicked");
+	log("stopButton clicked");
 	stopButton.disabled = true;
 	recordButton.disabled = false;
 	rec.stop();
@@ -90,16 +98,16 @@ function createRecordLinks(blob) {
 function doUploadData(event) {
     event.preventDefault();
 
-    console.log('in doUploadData');
+    log('in doUploadData');
     $("#statusDiv").text("Uploading...");
     $("#submitButton").prop("disabled", true);
 
     result_form_data.set('gender', $("#genderInput").val());
     result_form_data.set('age', $("#ageInput").val());
 
-    console.log("-------LOG result_form_data:");
+    log("-------LOG result_form_data:");
     for (var pair of result_form_data.entries()) {
-        console.log(pair[0]+ ', ' + pair[1]);
+        log(pair[0]+ ', ' + pair[1]);
     }
 
     server_url = $('#audiorecords').attr('action')
@@ -112,12 +120,12 @@ function doUploadData(event) {
           processData: false,
           data: result_form_data,
           error: function (request, error) {
-              console.log(arguments);
+              log(arguments);
               $("#statusDiv").html("").removeClass('alert alert-success alert-danger');
               $("#errorDiv").html("An error occured while sending form data.").addClass('alert').addClass('alert-danger')
           },
           success: function (response) {
-              console.log(response);
+              log(response);
               $('#recordingsList').empty();
               $("#errorDiv").html('').removeClass('alert alert-danger');
               $("#statusDiv").html("Uploaded successfully.").addClass('alert').addClass('alert-success');
@@ -150,11 +158,11 @@ function createSaveToDiskLink(container, url, filename) {
 
 function checkRecordsNumber() {
     if (recordingsList.childElementCount >= 3) {
-        console.log('in checkRecordsNumber: '+recordingsList.childElementCount+' records -> disable buttons')
+        log('in checkRecordsNumber: '+recordingsList.childElementCount+' records -> disable buttons')
         stopButton.disabled = true;
         recordButton.disabled = true;
     } else {
-        console.log('in checkRecordsNumber: '+recordingsList.childElementCount+' records -> unable buttons')
+        log('in checkRecordsNumber: '+recordingsList.childElementCount+' records -> unable buttons')
         stopButton.disabled = true;
         recordButton.disabled = false;
     }
