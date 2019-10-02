@@ -42,7 +42,6 @@
                 <ul type="disc">
                     <li>Press RECORD to start, and STOP to end your recording.</li>
                     <li>Playback the result using the ► button</li>
-                    <li>Repeat recording until you are happy with the recording content and quality (old recordings are over-written)</li>
                 </ul>
             </li>
             <li>Upload recordings:
@@ -73,25 +72,14 @@
         <fieldset>
           <div class="input-group">
             <label>Age</label>
-<!--            <input class="form-control" name="Q2Answer" size="120" type="text" />-->
-              <input class="form-control" type="text" name="ageInput" id="ageInput" size="20" required="true"/>
+              <input class="form-control" type="text" name="ageInput" id="ageInput"  required="true"/>
           </div>
         </fieldset>
 
 
 
-<!--        <fieldset><label>Please upload an image of the restaurant's menu</label>-->
-<!--        <div style="padding: 10px;">-->
-<!--           <input id="file" type="file"><button id="upload_file_button" type="button">Upload file</button>-->
-<!--           <span id="status">&nbsp;</span>-->
-<!--        </div>-->
-<!--        </fieldset>-->
         <fieldset>
             <div><label>Please record your command</label>
-<!--                <input type="file" accept="audio/*" capture id="recorder">-->
-<!--                <audio id="player" controls></audio>-->
-<!--                <a id="download">Download</a>-->
-<!--                <button id="stop">Stop</button>-->
 
                 <div class="alert alert-danger" id="shown"><strong>Warning!</strong> Awaiting permission for microphone. Connect microphone, provide permission and refresh page!</div>
 
@@ -103,20 +91,10 @@
                             <p id="recording" style="display:none">Recording ...</p>
                         </li>
                     </ul>
-<!--                    <div id="formats">Format: start recording to see sample rate</div>-->
+
                     <label>Recordings</label>
                     <ol id="recordingsList"></ol>
 
-<!--                    <input id="filename" name="Q1filename" style="display:none" />-->
-<!--                    <ul id="recordings_list" style="list-style-type: none;"><br />-->
-<!--                        <br /><br /><br /><br /><br /><br />-->
-<!--                        &nbsp;-->
-<!--                        <li>&nbsp;</li>-->
-<!--                        <li>&nbsp;</li>-->
-<!--                        <li>&nbsp;</li>-->
-<!--                        <li>&nbsp;</li>-->
-<!--                        <li>&nbsp;</li>-->
-<!--                    </ul>-->
                 </div>
             </div>
         </fieldset>
@@ -137,7 +115,6 @@
 <script src="./validate.js"></script>
 <script src="./recorder.js"></script>
 <script src="./getPermission.js"></script>
-<!--<script src="main.js"></script>-->
 <script src="./app.js"></script>
 <script type="text/javascript">
     $(document).ready(function () {

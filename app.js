@@ -169,33 +169,30 @@ function doUploadData(event) {
     for (var pair of result_form_data.entries()) {
         console.log(pair[0]+ ', ' + pair[1]);
     }
-    return false;
 
-/*
     $.ajax({
           method : "POST",
           type: "POST",
-          url: "https://publisherServer.com/",  // Address of the task publisher
+          url: "http://127.0.0.1:5000/",
           cache: false,
           contentType: false,
           processData: false,
-          data: form_data,                         // Setting the data attribute of ajax with file_data
+          data: result_form_data,                         // Setting the data attribute of ajax with file_data
           error: function (request, error) {
               console.log(arguments);
+              $("#statusDiv").text("");
+              $("#errorDiv").html("An error occured while sending form data.");
+              $("#errorDiv").addClass('alert').addClass('alert-danger')
           },
           success: function (response) {
               console.log(response);
-              var recordingslist = document.getElementById("recordingslist");
-              var li = document.createElement('li');
-              var msg = document.createElement('p');
-              msg.innerHTML = "<b>Uploaded successfully</b>";
-              li.appendChild(msg);
-              recordingslist.appendChild(li);
-
-              document.getElementById('upload').disabled = true;
+              $('#recordingsList').empty();
+              $("#errorDiv").html('').removeClass('alert').removeClass('alert-danger');
+              $("#statusDiv").text("Uploaded successfully.");
+              result_form_data = new FormData();
+              checkRecordsNumber();
           }
     })
-*/
 
 
 }

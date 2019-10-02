@@ -1,10 +1,13 @@
-venv/
 .idea/workspace.xml
 .idea
 _tmp/
 
 # Mac
 .DS_Store
+
+server/venv/
+server/audios/*
+server/__user_data.csv
 
 upload.html
 index.bk.html
