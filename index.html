@@ -1,8 +1,10 @@
 <meta charset="UTF-8">
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.142.0.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <link href="https://s3.amazonaws.com/mturk-public/bs30/css/bootstrap.min.css" rel="stylesheet" />
 <style type='text/css'>
 #recordingsList audio { display: block; margin-bottom: 10px; }
+#otherLanguageInput, #ageInput { width: 230px; }
 </style>
 <section class="container" id="Other" style="margin-bottom:15px; padding: 10px 10px; font-family: Verdana, Geneva, sans-serif; color:#333333; font-size:0.9em;">
 <div class="row col-xs-12 col-md-12">
@@ -69,6 +71,29 @@
             </select>
         </fieldset>
 
+        <fieldset><label>Native language</label>
+            <select id="languageInput" name="languageInput" required="true" onchange="toggleOtherLanguage(this);">
+                <option>Select</option>
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="zh">Chinese</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="ar">Arabic</option>
+                <option value="ru">Russian</option>
+                <option value="ko">Korean</option>
+                <option value="vi">Vietnamese</option>
+                <option value="other">Other</option>
+            </select>
+        </fieldset>
+
+        <fieldset>
+          <div class="input-group">
+            <label>If other, please specify:</label>
+              <input class="form-control" type="text" name="otherLanguageInput" id="otherLanguageInput" disabled="disabled"/>
+          </div>
+        </fieldset>
+
         <fieldset>
           <div class="input-group">
             <label>Age</label>
@@ -94,6 +119,9 @@
                     <label>Recordings</label>
                     <ol id="recordingsList"></ol>
 
+                    <input type="hidden" name="file_1" value=""/>
+                    <input type="hidden" name="file_2" value=""/>
+                    <input type="hidden" name="file_3" value=""/>
                 </div>
             </div>
         </fieldset>
@@ -111,12 +139,44 @@
 <!-- close container -->
 
 <style type="text/css">fieldset { padding: 10px; background:#fbfbfb; border-radius:5px; margin-bottom:5px; }</style>
-<script src="./validate.js"></script>
-<script src="./recorder.js"></script>
-<script src="./getPermission.js"></script>
-<script src="./app.js"></script>
+<script src="./js/validate.js"></script>
+<script src="./js/recorder.js"></script>
+<script src="./js/getPermission.js"></script>
+<script src="./js/app.js"></script>
 <script type="text/javascript">
+
+    let config = {
+        region: 'us-east-2',
+        pool: 'us-east-2:bb48fc89-c207-4fc6-a848-b0c789f53194',
+        bucket: 'mturk-audio-submissions'
+    }
+
+    AWS.config.region = config.region;
+    AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+      IdentityPoolId: config.pool,
+    });
+
+//    checkAwsCredentials();
+
+    let s3 = new AWS.S3({
+        apiVersion: '2006-03-01',
+        params: { Bucket: config.bucket },
+        region: config.region,
+        credentials: AWS.config.credentials
+    });
+
+    // index.html?workerId=Wkr1&assignmentId=Assign123&hitId=bb48fc89-c207-4fc6-a848-b0c789f53194
+    let workerId = turkGetParam('workerId');
+    let assignmentId = turkGetParam('assignmentId');
+    let hitId = turkGetParam('hitId');
+
+    log('workerId: '+workerId);
+    log('assignmentId: '+assignmentId);
+    log('hitId: '+hitId);
+
+
     $(document).ready(function () {
+
         $("#submitButton").click(function (e) {
             ValidateAll(e);
             return false;
@@ -131,5 +191,13 @@
             checkRecordsNumber();
         });
     });
+
+    function toggleOtherLanguage(obj) {
+        if (obj.value == "other") {
+            $('#otherLanguageInput').prop('disabled', false).prop('required', true);
+        } else {
+            $('#otherLanguageInput').prop('disabled', true).prop('required', false).val("");
+        }
+    }
 
 </script>

@@ -8,6 +8,21 @@ function ValidateAll(event) {
         errorCounter++;
     }
 
+    // Language
+    if ($("#languageInput").val() == 'Select') {
+        errorMessage += " Please select your language<br/>";
+        errorCounter++;
+    }
+    if ($("#languageInput").val() == 'other') {
+        if ($("#otherLanguageInput").val() == '') {
+            errorMessage += " Please enter your other language<br/>";
+            errorCounter++;
+        } else if (!/^[a-zA-Z]*$/.test($("#otherLanguageInput").val().trim())) {
+            errorMessage += " Invalid other language - it should be alphabetical<br/>";
+            errorCounter++;
+        }
+    }
+
     // Age
     age = $("#ageInput").val()
     if (age == '') {

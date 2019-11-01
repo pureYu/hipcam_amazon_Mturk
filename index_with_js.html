@@ -1,0 +1,234 @@
+<meta charset="UTF-8">
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.142.0.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<link href="https://s3.amazonaws.com/mturk-public/bs30/css/bootstrap.min.css" rel="stylesheet" />
+<style type='text/css'>
+#recordingsList audio { display: block; margin-bottom: 10px; }
+#otherLanguageInput, #ageInput { width: 230px; }
+</style>
+<section class="container" id="Other" style="margin-bottom:15px; padding: 10px 10px; font-family: Verdana, Geneva, sans-serif; color:#333333; font-size:0.9em;">
+<div class="row col-xs-12 col-md-12">
+
+<!-- Instructions -->
+<div class="container">
+	<div class="page-header">
+		<h1>Audio submission for Amazon Mechanical Turk</h1>
+	</div>
+
+<div class="panel panel-primary">
+
+	<div class="panel-heading"><strong>Task description</strong></div>
+	<div class="panel-body">
+		<p>Record yourself saying ‘Hello, Hipcam’ 3 times in different tone/speed and upload audio files to this HIT.</p>
+	</div>
+
+    <div class="panel-heading"><strong>Instructions</strong></div>
+    <div class="panel-body">
+        <b>Step 1: Record audio</b>
+        <ol type="number">
+            <li>Fill the form below - your gender and age.</li>
+            <li>Srart recording your audios.</li>
+        </ol>
+
+        <b>Step 2: Record audio</b>
+        <ol type="number">
+            <li>System Checks:
+                <ul type="disc">
+                    <li>Make sure your microphone is connected and working.</li>
+                    <li>Use a recent Goggle Chrome browser version, and allow permission for browser to use microphone.</li>
+                    <li><b>NOTE: You may have to enable loading scripts on this page. Look for the symbol <img src="shield_icon.png" /> on the top right of the page on the address bar.<br />
+                    <font color="red">Refresh the page after providing permissions.</font></b></li>
+                </ul>
+            </li>
+            <li>Make the recording:
+                <ul type="disc">
+                    <li>Press RECORD to start, and STOP to end your recording.</li>
+                    <li>Playback the result using the ► button</li>
+                </ul>
+            </li>
+            <li>Upload recordings:
+            <ul type="disc">
+                <li>Click on the <b>Upload</b> button to submit. On successful upload, the message <b>Uploaded successfully</b> appears.</li>
+            </ul>
+            </li>
+        </ol>
+    </div>
+
+</div>
+<!-- End Instructions -->
+
+<!-- Form Content: -->
+<section>
+    <div id="errorDiv"></div>
+    <div id="statusDiv">&nbsp;</div>
+
+    <form id="audiorecords" action="http://127.0.0.1:5000/" method='POST' enctype="multipart/form-data">
+        <fieldset><label>Gender</label>
+            <select id="genderInput" name="genderInput" required="true">
+                <option>Select</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+        </fieldset>
+
+        <fieldset><label>Native language</label>
+            <select id="languageInput" name="languageInput" required="true" onchange="toggleOtherLanguage(this);">
+                <option>Select</option>
+                <option value="en">English</option>
+                <option value="es">Spanish</option>
+                <option value="zh">Chinese</option>
+                <option value="fr">French</option>
+                <option value="de">German</option>
+                <option value="ar">Arabic</option>
+                <option value="ru">Russian</option>
+                <option value="ko">Korean</option>
+                <option value="vi">Vietnamese</option>
+                <option value="other">Other</option>
+            </select>
+        </fieldset>
+
+        <fieldset>
+          <div class="input-group">
+            <label>If other, please specify:</label>
+              <input class="form-control" type="text" name="otherLanguageInput" id="otherLanguageInput" disabled="disabled"/>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="input-group">
+            <label>Age</label>
+              <input class="form-control" type="text" name="ageInput" id="ageInput"  required="true"/>
+          </div>
+        </fieldset>
+
+
+
+        <fieldset>
+            <div><label>Please record your command</label>
+
+                <div class="alert alert-danger" id="shown"><strong>Warning!</strong> Awaiting permission for microphone. Connect microphone, provide permission and refresh page!</div>
+
+                <div id="hidden" style="display:none">
+                    <ul style="list-style-type: none;">
+                        <li><button type="button" class="btn btn-primary" id="recordButton" style="margin-right:5px">Record</button>
+                            <button type="button" class="btn btn-primary" disabled="disabled" id="stopButton" >Stop</button>
+                            <p id="recording" style="display:none">Recording ...</p>
+                        </li>
+                    </ul>
+
+                    <label>Recordings</label>
+                    <ol id="recordingsList"></ol>
+
+                </div>
+            </div>
+        </fieldset>
+
+        <input type="reset" id="resetButton" value='Reset'/>
+        <input type="submit" id="submitButton" value='Submit'/>
+
+    </form>
+</section>
+<!-- End Form Content -->
+
+</div>
+</div>
+</section>
+<!-- close container -->
+
+<style type="text/css">fieldset { padding: 10px; background:#fbfbfb; border-radius:5px; margin-bottom:5px; }</style>
+<!--<script src="./validate.js"></script>-->
+<script type="text/javascript">function ValidateAll(event){var errorCounter=0;var errorMessage="";if($("#genderInput").val()=='Select'){errorMessage+=" Please select your gender<br/>";errorCounter++}
+if($("#languageInput").val()=='Select'){errorMessage+=" Please select your language<br/>";errorCounter++}
+if($("#languageInput").val()=='other'){if($("#otherLanguageInput").val()==''){errorMessage+=" Please enter your other language<br/>";errorCounter++}else if(!/^[a-zA-Z]*$/.test($("#otherLanguageInput").val().trim())){errorMessage+=" Invalid other language - it should be alphabetical<br/>";errorCounter++}}
+age=$("#ageInput").val()
+if(age==''){errorMessage+=" Enter your age<br/>";errorCounter++}else if(!$.isNumeric(age)||isNaN(age)||age<5||age>100){errorMessage+=" Invalid age - should be numeric, between 5 and 99<br/>";errorCounter++}
+files_recorded=$("#recordingsList").children().length;if(files_recorded!=3){errorMessage+=" Record 3 audio files<br/>";errorCounter++}
+$("#errorDiv").html(errorMessage);if(errorCounter==0){$("#errorDiv").removeClass('alert').removeClass('alert-danger')
+console.log('Thank you! Form submitting...');doUploadData(event);return!0}else{$("#errorDiv").addClass('alert').addClass('alert-danger')
+return!1}}</script>
+<!--<script src="./recorder.js"></script>-->
+<script type="text/javascript">(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Recorder=f()}})(function(){var define,module,exports;return(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){"use strict";module.exports=require("./recorder").Recorder},{"./recorder":2}],2:[function(require,module,exports){'use strict';var _createClass=(function(){function defineProperties(target,props){for(var i=0;i<props.length;i++){var descriptor=props[i];descriptor.enumerable=descriptor.enumerable||!1;descriptor.configurable=!0;if("value" in descriptor)descriptor.writable=!0;Object.defineProperty(target,descriptor.key,descriptor)}}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor}})();Object.defineProperty(exports,"__esModule",{value:!0});exports.Recorder=undefined;var _inlineWorker=require('inline-worker');var _inlineWorker2=_interopRequireDefault(_inlineWorker);function _interopRequireDefault(obj){return obj&&obj.__esModule?obj:{default:obj}}
+function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError("Cannot call a class as a function")}}
+var Recorder=exports.Recorder=(function(){function Recorder(source,cfg){var _this=this;_classCallCheck(this,Recorder);this.config={bufferLen:4096,numChannels:2,mimeType:'audio/wav'};this.recording=!1;this.callbacks={getBuffer:[],exportWAV:[]};Object.assign(this.config,cfg);this.context=source.context;this.node=(this.context.createScriptProcessor||this.context.createJavaScriptNode).call(this.context,this.config.bufferLen,this.config.numChannels,this.config.numChannels);this.node.onaudioprocess=function(e){if(!_this.recording)return;var buffer=[];for(var channel=0;channel<_this.config.numChannels;channel++){buffer.push(e.inputBuffer.getChannelData(channel))}
+_this.worker.postMessage({command:'record',buffer:buffer})};source.connect(this.node);this.node.connect(this.context.destination);var self={};this.worker=new _inlineWorker2.default(function(){var recLength=0,recBuffers=[],sampleRate=undefined,numChannels=undefined;self.onmessage=function(e){switch(e.data.command){case 'init':init(e.data.config);break;case 'record':record(e.data.buffer);break;case 'exportWAV':exportWAV(e.data.type);break;case 'getBuffer':getBuffer();break;case 'clear':clear();break}};function init(config){sampleRate=config.sampleRate;numChannels=config.numChannels;initBuffers()}
+function record(inputBuffer){for(var channel=0;channel<numChannels;channel++){recBuffers[channel].push(inputBuffer[channel])}
+recLength+=inputBuffer[0].length}
+function exportWAV(type){var buffers=[];for(var channel=0;channel<numChannels;channel++){buffers.push(mergeBuffers(recBuffers[channel],recLength))}
+var interleaved=undefined;if(numChannels===2){interleaved=interleave(buffers[0],buffers[1])}else{interleaved=buffers[0]}
+var dataview=encodeWAV(interleaved);var audioBlob=new Blob([dataview],{type:type});self.postMessage({command:'exportWAV',data:audioBlob})}
+function getBuffer(){var buffers=[];for(var channel=0;channel<numChannels;channel++){buffers.push(mergeBuffers(recBuffers[channel],recLength))}
+self.postMessage({command:'getBuffer',data:buffers})}
+function clear(){recLength=0;recBuffers=[];initBuffers()}
+function initBuffers(){for(var channel=0;channel<numChannels;channel++){recBuffers[channel]=[]}}
+function mergeBuffers(recBuffers,recLength){var result=new Float32Array(recLength);var offset=0;for(var i=0;i<recBuffers.length;i++){result.set(recBuffers[i],offset);offset+=recBuffers[i].length}
+return result}
+function interleave(inputL,inputR){var length=inputL.length+inputR.length;var result=new Float32Array(length);var index=0,inputIndex=0;while(index<length){result[index++]=inputL[inputIndex];result[index++]=inputR[inputIndex];inputIndex++}
+return result}
+function floatTo16BitPCM(output,offset,input){for(var i=0;i<input.length;i++,offset+=2){var s=Math.max(-1,Math.min(1,input[i]));output.setInt16(offset,s<0?s*0x8000:s*0x7FFF,!0)}}
+function writeString(view,offset,string){for(var ii=0;i<string.length;i++){view.setUint8(offset+i,string.charCodeAt(i))}}
+function encodeWAV(samples){var buffer=new ArrayBuffer(44+samples.length*2);var view=new DataView(buffer);writeString(view,0,'RIFF');view.setUint32(4,36+samples.length*2,!0);writeString(view,8,'WAVE');writeString(view,12,'fmt ');view.setUint32(16,16,!0);view.setUint16(20,1,!0);view.setUint16(22,numChannels,!0);view.setUint32(24,sampleRate,!0);view.setUint32(28,sampleRate*4,!0);view.setUint16(32,numChannels*2,!0);view.setUint16(34,16,!0);writeString(view,36,'data');view.setUint32(40,samples.length*2,!0);floatTo16BitPCM(view,44,samples);return view}},self);this.worker.postMessage({command:'init',config:{sampleRate:this.context.sampleRate,numChannels:this.config.numChannels}});this.worker.onmessage=function(e){var cb=_this.callbacks[e.data.command].pop();if(typeof cb=='function'){cb(e.data.data)}}}
+_createClass(Recorder,[{key:'record',value:function record(){this.recording=!0}},{key:'stop',value:function stop(){this.recording=!1}},{key:'clear',value:function clear(){this.worker.postMessage({command:'clear'})}},{key:'getBuffer',value:function getBuffer(cb){cb=cb||this.config.callback;if(!cb)throw new Error('Callback not set');this.callbacks.getBuffer.push(cb);this.worker.postMessage({command:'getBuffer'})}},{key:'exportWAV',value:function exportWAV(cb,mimeType){mimeType=mimeType||this.config.mimeType;cb=cb||this.config.callback;if(!cb)throw new Error('Callback not set');this.callbacks.exportWAV.push(cb);this.worker.postMessage({command:'exportWAV',type:mimeType})}}],[{key:'forceDownload',value:function forceDownload(blob,filename){var url=(window.URL||window.webkitURL).createObjectURL(blob);var link=window.document.createElement('a');link.href=url;link.download=filename||'output.wav';var click=document.createEvent("Event");click.initEvent("click",!0,!0);link.dispatchEvent(click)}}]);return Recorder})();exports.default=Recorder},{"inline-worker":3}],3:[function(require,module,exports){"use strict";module.exports=require("./inline-worker")},{"./inline-worker":4}],4:[function(require,module,exports){(function(global){"use strict";var _createClass=(function(){function defineProperties(target,props){for(var key in props){var prop=props[key];prop.configurable=!0;if(prop.value)prop.writable=!0}Object.defineProperties(target,props)}return function(Constructor,protoProps,staticProps){if(protoProps)defineProperties(Constructor.prototype,protoProps);if(staticProps)defineProperties(Constructor,staticProps);return Constructor}})();var _classCallCheck=function(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError("Cannot call a class as a function")}};var WORKER_ENABLED=!!(global===global.window&&global.URL&&global.Blob&&global.Worker);var InlineWorker=(function(){function InlineWorker(func,self){var _this=this;_classCallCheck(this,InlineWorker);if(WORKER_ENABLED){var functionBody=func.toString().trim().match(/^function\s*\w*\s*\([\w\s,]*\)\s*{([\w\W]*?)}$/)[1];var url=global.URL.createObjectURL(new global.Blob([functionBody],{type:"text/javascript"}));return new global.Worker(url)}
+this.self=self;this.self.postMessage=function(data){setTimeout(function(){_this.onmessage({data:data})},0)};setTimeout(function(){func.call(self)},0)}
+_createClass(InlineWorker,{postMessage:{value:function postMessage(data){var _this=this;setTimeout(function(){_this.self.onmessage({data:data})},0)}}});return InlineWorker})();module.exports=InlineWorker}).call(this,typeof global!=="undefined"?global:typeof self!=="undefined"?self:typeof window!=="undefined"?window:{})},{}]},{},[1])(1)})</script>
+<!--<script src="./getPermission.js"></script>-->
+<script type="text/javascript">window.onload=function init(){try{window.AudioContext=window.AudioContext||window.webkitAudioContext;navigator.getUserMedia=navigator.getUserMedia||navigator.webkitGetUserMedia;window.URL=window.URL||window.webkitURL;audio_context=new AudioContext;navigator.mediaDevices.getUserMedia({audio:!0,video:!1}).then(function(stream){togglePermissionPanel()})}catch(e){}}</script>
+<!--<script src="./app.js"></script>-->
+<script type="text/javascript">URL=window.URL||window.webkitURL;var gumStream;var rec;var input;var DEBUG=true;var AudioContext=window.AudioContext||window.webkitAudioContext;var audioContext var recordButton=document.getElementById("recordButton");var stopButton=document.getElementById("stopButton");recordButton.addEventListener("click",startRecording);stopButton.addEventListener("click",stopRecording);result_form_data=new FormData();function turkGetParam(name){var regexS="[\?&]"+name+"=([^&#]*)";var regex=new RegExp(regexS);var tmpURL=window.location.href;var results=regex.exec(tmpURL);if(results==null){return""}else{return results[1]}};var log=function(){if(DEBUG){window.LOG_LEVEL='DEBUG';console.log.apply(console,arguments)}};function checkAwsCredentials(){AWS.config.credentials.get(function(err){if(err)console.log('AWS.config.credentials error: ',err);else console.log('AWS.config.credentials: ',AWS.config.credentials)})};function togglePermissionPanel(){$("#shown").toggle();$("#hidden").toggle()};function startRecording(){var constraints={audio:true,video:false}recordButton.disabled=true;stopButton.disabled=false;navigator.mediaDevices.getUserMedia(constraints).then(function(stream){log("getUserMedia() success, stream created, initializing Recorder.js ...");audioContext=new AudioContext();gumStream=stream;input=audioContext.createMediaStreamSource(stream);rec=new Recorder(input,{numChannels:1});rec.record()}).catch(function(err){togglePermissionPanel();recordButton.disabled=false;stopButton.disabled=true})};function stopRecording(){stopButton.disabled=true;recordButton.disabled=false;rec.stop();gumStream.getAudioTracks()[0].stop();rec.exportWAV(createRecordLinks)};function createRecordLinks(blob){var url=URL.createObjectURL(blob);var au=document.createElement('audio');var li=document.createElement('li');var filename=new Date().toISOString();var filename_for_input=new Date().getTime();filename_for_input="audio_"+filename_for_input;var filename_w_ext=filename+".wav"au.controls=true;au.src=url;li.appendChild(au);span=document.createElement('span');span.setAttribute("class","recordname");span.textContent=filename_w_ext;li.appendChild(span);li.appendChild(document.createTextNode(" "));li.appendChild(document.createTextNode(" "));createDeleteLink(li,filename_for_input);recordingsList.appendChild(li);checkRecordsNumber()};let files_uploaded_locations=[];const onUploadRecordComplete=function(err,data){if(err){log('s3 error: '+err);alert("Failed to upload. Please contact the Requester.");files_uploaded_locations=[];return}log(`File uploaded successfully.${data.Location}`);files_uploaded_locations.push(data.Location);if(files_uploaded_locations.length===3){uploadFormData()}};function uploadRecords(){$("#recordingsList").children().each(function(){let recLi=this;let fileBlob=$(recLi).find("audio").attr('src');let filename=$(recLi).find(".recordname").text();let workerId=turkGetParam('workerId');let assignmentId=turkGetParam('assignmentId');let hitId=turkGetParam('hitId');let fileKey=hitId+'-'+assignmentId+'-'+workerId+'-'+filename;log('fileKey: '+fileKey);log('fileBlob: '+fileBlob);s3.upload({Key:fileKey,Body:fileBlob,ContentType:'audio/wav',ACL:'bucket-owner-full-control'},onUploadRecordComplete)})};function uploadFormData(){result_form_data.set('gender',$("#genderInput").val());result_form_data.set('language',$("#languageInput").val());result_form_data.set('age',$("#ageInput").val());if($("#languageInput").val()=='other'){result_form_data.set('other_language',$("#otherLanguageInput").val().trim())}if(files_uploaded_locations.length===3){files_uploaded_locations.forEach(function(item,index){result_form_data.set('file_'+(index+1),item)})}log("-------LOG result_form_data:");for(var pair of result_form_data.entries()){log(pair[0]+', '+pair[1])}log('!!!');server_url=$('#audiorecords').attr('action')$.ajax({method:"POST",type:"POST",url:server_url,cache:false,contentType:false,processData:false,data:result_form_data,error:function(request,error){log(arguments);$("#statusDiv").html("").removeClass('alert alert-success alert-danger');$("#errorDiv").html("An error occured while sending form data.").addClass('alert').addClass('alert-danger')},success:function(response){log(response);$('#recordingsList').empty();$("#errorDiv").html('').removeClass('alert alert-danger');$("#statusDiv").html("Uploaded successfully.").addClass('alert').addClass('alert-success');result_form_data=new FormData();checkRecordsNumber()}})};function doUploadData(event){event.preventDefault();log('in doUploadData');$("#statusDiv").text("Uploading...");stopButton.disabled=true;recordButton.disabled=true;submitButton.disabled=true;resetButton.disabled=true;uploadRecords()};function createDeleteLink(container,filename_for_input){var delete_link=document.createElement('a');delete_link.href="#";delete_link.innerHTML="Delete";delete_link.addEventListener("click",function(event){this.parentNode.remove();result_form_data.delete(filename_for_input)checkRecordsNumber();event.preventDefault()})container.appendChild(delete_link)};function createSaveToDiskLink(container,url,filename){var link=document.createElement('a');link.href=url;link.download=filename+".wav";link.innerHTML="Save to disk";container.appendChild(link)};function checkRecordsNumber(){if(recordingsList.childElementCount>=3){log('in checkRecordsNumber: '+recordingsList.childElementCount+' records -> disable buttons')stopButton.disabled=true;recordButton.disabled=true}else{log('in checkRecordsNumber: '+recordingsList.childElementCount+' records -> unable buttons')stopButton.disabled=true;recordButton.disabled=false}};</script>
+<script type="text/javascript">
+
+    let config = {
+        region: 'us-east-2',
+        pool: 'us-east-2:bb48fc89-c207-4fc6-a848-b0c789f53194',
+        bucket: 'mturk-audio-submissions'
+    }
+
+    AWS.config.region = config.region;
+    AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+      IdentityPoolId: config.pool,
+    });
+
+//    checkAwsCredentials();
+
+    let s3 = new AWS.S3({
+        apiVersion: '2006-03-01',
+        params: { Bucket: config.bucket },
+        region: config.region,
+        credentials: AWS.config.credentials
+    });
+
+    // index.html?workerId=Wkr1&assignmentId=Assign123&hitId=bb48fc89-c207-4fc6-a848-b0c789f53194
+    let workerId = turkGetParam('workerId');
+    let assignmentId = turkGetParam('assignmentId');
+    let hitId = turkGetParam('hitId');
+
+    log('workerId: '+workerId);
+    log('assignmentId: '+assignmentId);
+    log('hitId: '+hitId);
+
+
+    $(document).ready(function () {
+
+        $("#submitButton").click(function (e) {
+            ValidateAll(e);
+            return false;
+        });
+        $("#resetButton").click(function (e) {
+            $('#audiorecords')[0].reset();
+            result_form_data = new FormData();
+            $('#recordingsList').empty();
+            $("#errorDiv").html('').removeClass('alert').removeClass('alert-danger');
+            $("#statusDiv").text("").removeClass('alert').removeClass('alert-success');
+            $("#submitButton").prop("disabled", false);
+            checkRecordsNumber();
+        });
+    });
+
+    function toggleOtherLanguage(obj) {
+        if (obj.value == "other") {
+            $('#otherLanguageInput').prop('disabled', false).prop('required', true);
+        } else {
+            $('#otherLanguageInput').prop('disabled', true).prop('required', false).val("");
+        }
+    }
+
+</script>

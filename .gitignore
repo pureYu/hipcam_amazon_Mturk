@@ -7,8 +7,8 @@ __pycache__/
 .DS_Store
 
 server/venv/
-server/audios/*
-server/__user_data.csv
+#server/audios/*
+#server/__user_data.csv
 
 upload.html
 index.bk.html
