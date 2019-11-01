@@ -101,7 +101,7 @@ function createRecordLinks(blob) {
 	li.appendChild(document.createTextNode (" "));
 
 	//save to disk link
-    //createSaveToDiskLink(li, url, filename)
+    createSaveToDiskLink(li, url, filename)
 
 	li.appendChild(document.createTextNode (" "));
 	createDeleteLink(li, filename_for_input);
@@ -114,130 +114,6 @@ function createRecordLinks(blob) {
 
 
 let files_uploaded_locations = [];
-
-const onUploadRecordComplete = function(err, data) {
-    if (err) {
-        log('s3 error: '+err);
-        alert("Failed to upload. Please contact the Requester.");
-        files_uploaded_locations = [];
-//        $(recLi).remove();
-        return;
-    }
-    log(`File uploaded successfully. ${data.Location}`);
-    files_uploaded_locations.push(data.Location);
-
-    if(files_uploaded_locations.length === 3) {
-        uploadFormData();
-    }
-};
-
-function uploadRecords() {
-
-    $("#recordingsList").children().each(function() {
-
-        let recLi = this;
-        let fileBlob = $(recLi).find("audio").attr('src');  // blob:null/704424b7-1d64-4c92-8f14-1632d7246fd4
-        let filename = $(recLi).find(".recordname").text(); // 2019-10-22T11:42:06.454Z.wav
-
-        let workerId = turkGetParam('workerId');
-        let assignmentId = turkGetParam('assignmentId');
-        let hitId = turkGetParam('hitId');
-        let fileKey = hitId + '-' + assignmentId + '-' + workerId + '-' + filename;
-
-        log('fileKey: '+fileKey);
-        log('fileBlob: '+fileBlob);
-
-        s3.upload({
-          Key: fileKey,
-          Body: fileBlob,
-          ContentType: 'audio/wav',
-          ACL: 'bucket-owner-full-control'
-        }, onUploadRecordComplete);
-/*
-        s3.upload({
-          Key: fileKey,
-          Body: fileBlob,
-          ContentType: 'audio/wav',
-          ACL: 'bucket-owner-full-control'
-        }, function(err, data) {
-          if (err) {
-            log('s3 error: '+err);
-            alert("Failed to upload. Please contact the Requester.");
-            $(recLi).remove();
-          }
-          else{
-            log('s3 Success: '+data);
-          }
-          //$(event.currentTarget).prop("disabled", false);
-        });
-*/
-    });
-};
-
-function uploadFormData() {
-
-    result_form_data.set('gender', $("#genderInput").val());
-    result_form_data.set('language', $("#languageInput").val());
-    result_form_data.set('age', $("#ageInput").val());
-
-    if ($("#languageInput").val() == 'other') {
-        result_form_data.set('other_language', $("#otherLanguageInput").val().trim());
-    }
-
-    if(files_uploaded_locations.length === 3) {
-        files_uploaded_locations.forEach(function (item, index) {
-            let input_name = 'file_'+(index+1);
-            $('input[type=hidden][name='+input_name+']').val(item);
-            result_form_data.set('file_'+(index+1), item);
-        });
-    }
-
-    log("-------LOG result_form_data:");
-    for (var pair of result_form_data.entries()) {
-        log(pair[0]+ ', ' + pair[1]);
-    }
-    log('!!!');
-
-    server_url = $('#audiorecords').attr('action')
-    $.ajax({
-          method : "POST",
-          type: "POST",
-          url: server_url,
-          cache: false,
-          contentType: false,
-          processData: false,
-          data: result_form_data,
-          error: function (request, error) {
-              console.log('request: ', request);
-              console.log('error: ', error);
-              $("#statusDiv").html("").removeClass('alert alert-success alert-danger');
-              $("#errorDiv").html("An error occured while sending form data.").addClass('alert').addClass('alert-danger')
-          },
-          success: function (response) {
-              log(response);
-              $('#recordingsList').empty();
-              $("#errorDiv").html('').removeClass('alert alert-danger');
-              $("#statusDiv").html("Uploaded successfully.").addClass('alert').addClass('alert-success');
-              result_form_data = new FormData();
-              checkRecordsNumber();
-              recordButton.disabled = true;
-          }
-    })
-
-};
-
-function doUploadData(event) {
-    event.preventDefault();
-
-    log('in doUploadData');
-    $("#statusDiv").text("Uploading...");
-    stopButton.disabled = true;
-    recordButton.disabled = true;
-    submitButton.disabled = true;
-    resetButton.disabled = true;
-
-    uploadRecords();
-};
 
 function createDeleteLink(container, filename_for_input) {
     var delete_link = document.createElement('a');
@@ -272,3 +148,148 @@ function checkRecordsNumber() {
     }
 
 };
+
+const uploadFile = fileData => {
+  return new Promise(function(resolve, reject) {
+    console.log('start - ', fileData.fileKey, fileData.fileBlob);
+
+      fetch(fileData.fileBlob)
+          .then(r => {return r.blob()})
+          .then(blobFile => new File([blobFile], fileData.fileKey, { type: "audio/wav" }))
+          .then(function(file){
+                log(file);
+//                var link = document.createElement("a"); // Or maybe get it from the current document
+//                link.href = URL.createObjectURL(file);
+//                link.download = fileData.fileKey;
+//                link.innerHTML = "Click here to download the file ";
+//                document.body.appendChild(link); // Or append it whereever you want
+
+
+                s3.upload(
+                  {
+                    Key: fileData.fileKey,
+                    Body: file,
+                    ContentType: 'audio/wav',
+                    ACL: 'bucket-owner-full-control'
+                  },
+                  function(err, data) {
+                    if (err) {
+                        log('s3 error: '+err);
+                        alert("Failed to upload. Please contact the Requester.");
+                        files_uploaded_locations = [];
+                        reject(err)
+                    }
+                    log(`File uploaded successfully. ${data.Location}`);
+                    files_uploaded_locations.push(data.Location);
+
+                    if(files_uploaded_locations.length === 3) {
+                        files_uploaded_locations.forEach(function (item, index) {
+                            let input_name = 'file_'+(index+1);
+                            $('input[type=hidden][name='+input_name+']').val(item);
+                        });
+                    }
+
+                    resolve(true)
+                   }
+                )
+          });
+
+
+  })
+}
+
+const lockForm = () => {
+    $('#statusDiv').text('Uploading...');
+    stopButton.disabled = true;
+    recordButton.disabled = true;
+    submitButton.disabled = true;
+    resetButton.disabled = true;
+}
+
+const getFileData = recLi => {
+  let fileBlob = $(recLi).find('audio').attr('src'); // blob:null/704424b7-1d64-4c92-8f14-1632d7246fd4
+  let filename = $(recLi).find('.recordname').text() ;// 2019-10-22T11:42:06.454Z.wav
+  let fileKey = hitId + '-' + assignmentId + '-' + workerId + '-' + filename;
+
+  log('fileKey: ' + fileKey);
+  log('fileBlob: ' + fileBlob);
+
+  return { fileKey, fileBlob };
+}
+
+const startUploadFiles = () => {
+    log('in doUploadData');
+
+    return new Promise(resolve => {
+        const workerId = turkGetParam('workerId');
+        const assignmentId = turkGetParam('assignmentId');
+        const hitId = turkGetParam('hitId');
+
+        const filesData = [];
+        $('#recordingsList').children().each(function() {
+            filesData.push(getFileData(this));
+        })
+
+        Promise.all([
+            uploadFile(filesData[0]),
+            uploadFile(filesData[1],
+            uploadFile(filesData[2]))
+            ]
+        )
+        .then(() => {
+            log('all the files have been uploaded');
+            resolve(true);
+        })
+        .catch(error => {
+            log('something went wrong during uploading');
+            log(error);
+            resolve(false);
+        })
+  })
+}
+
+const validatedUpload = async event => {
+    log('-------------------------');
+    log('doUploadDataAsync', 1);
+
+    lockForm();
+
+    try {
+        const filesUploadResult = await startUploadFiles();
+        log(filesUploadResult);
+        return filesUploadResult;
+    } catch (error) {
+        console.log(error);
+        return false;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

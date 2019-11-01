@@ -44,7 +44,6 @@ function ValidateAll(event) {
     if (errorCounter == 0) {
         $("#errorDiv").removeClass('alert').removeClass('alert-danger')
         console.log('Thank you! Form submitting...');
-        doUploadData(event);
         return true;
     } else {
         $("#errorDiv").addClass('alert').addClass('alert-danger')

@@ -177,9 +177,19 @@
 
     $(document).ready(function () {
 
-        $("#submitButton").click(function (e) {
-            ValidateAll(e);
-            return false;
+        $("#submitButton").click(async function (e) {
+            e.preventDefault();
+            let valid = ValidateAll(e);
+            if (!valid) {
+                return false;
+            }
+            const result = await validatedUpload(e);
+            if (result) {
+                submitButton.disabled = false;
+                $('#audiorecords').submit();
+            }
+            return result;
+
         });
         $("#resetButton").click(function (e) {
             $('#audiorecords')[0].reset();
